@@ -1,7 +1,10 @@
 import streamlit as st
 import re
 
+st.set_page_config(page_title="Password Strength Checker", page_icon="🔐")
+
 st.title("🔐 Password Strength Checker")
+st.write("Check how strong your password is")
 
 password = st.text_input("Enter your password", type="password")
 
@@ -25,26 +28,41 @@ def check_password(password):
     else:
         suggestions.append("Add numbers")
 
-    if re.search("[!@#$%^&*]", password):
+    if re.search("[!@#$%^&*(),.?\":{}|<>]", password):
         score += 1
     else:
         suggestions.append("Add special characters")
+
+    if len(password) >= 12:
+        score += 1
 
     return score, suggestions
 
 
 if st.button("Check Password"):
 
-    score, suggestions = check_password(password)
+    if password:
 
-    if score <= 1:
-        st.error("Weak Password")
-    elif score == 2:
-        st.warning("Medium Password")
+        score, suggestions = check_password(password)
+
+        st.subheader("Password Strength")
+
+        # Progress bar
+        st.progress(score / 5)
+
+        st.write(f"Score: {score} / 5")
+
+        if score <= 2:
+            st.error("Weak Password")
+        elif score == 3:
+            st.warning("Medium Password")
+        else:
+            st.success("Strong Password")
+
+        if suggestions:
+            st.write("Suggestions to improve:")
+            for s in suggestions:
+                st.write("- ", s)
+
     else:
-        st.success("Strong Password")
-
-    if suggestions:
-        st.write("Suggestions:")
-        for s in suggestions:
-            st.write("-", s)
+        st.warning("Please enter a password")
